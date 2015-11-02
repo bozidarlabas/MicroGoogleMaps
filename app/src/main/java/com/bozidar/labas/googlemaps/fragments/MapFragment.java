@@ -4,6 +4,9 @@ import android.graphics.BitmapFactory;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.bozidar.labas.googlemaps.R;
@@ -15,6 +18,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -181,6 +185,46 @@ public class MapFragment extends SupportMapFragment implements GoogleApiClient.C
     public boolean onMarkerClick(Marker marker) {
         marker.showInfoWindow();
         return true;
+    }
+
+    /**
+     * Method for drawing circle on map
+     * @param location
+     */
+    private void drawCircle(LatLng location){
+        CircleOptions options = new CircleOptions();
+        options.center(location);
+
+        options.radius(10); //10 meters
+        options.fillColor(getResources().getColor(R.color.circle_color));
+        options.strokeColor(getResources().getColor(R.color.stroke_color));
+        options.strokeWidth(10);
+        getMap().addCircle(options);
+    }
+
+    /**
+     * Inflate main menu
+     * @param menu
+     * @param inflater
+     */
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.main_menu, menu);
+    }
+
+    /**
+     * Get clicked item action from menu
+     * @param item
+     * @return
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.action_circle:
+                drawCircle(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()));
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
 

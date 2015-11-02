@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">GoogleMaps</string>
     <string name="google_api_key">AIzaSyBCOVK3E4ROMmRobG53BPGSEXsPyJcT8dk</string>
+    <string name="action_circle">Circle</string>
 </resources>
