@@ -7,8 +7,10 @@ import android.view.View;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
@@ -54,6 +56,20 @@ public class MapFragment extends SupportMapFragment implements GoogleApiClient.C
         initListeners();
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        googleApiClient.connect();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if(googleApiClient != null && googleApiClient.isConnected()){
+            googleApiClient.disconnect();
+        }
+    }
+
     /**
      * The initListeners method binds the interfaces
      */
@@ -64,9 +80,36 @@ public class MapFragment extends SupportMapFragment implements GoogleApiClient.C
         getMap().setOnMapClickListener(this);
     }
 
+    /**
+     * Whwen the client has connected, grab the users most recently retrieved location and use that for aiming map camera
+     * @param bundle
+     */
     @Override
     public void onConnected(Bundle bundle) {
+        currentLocation = LocationServices
+                .FusedLocationApi
+                .getLastLocation(googleApiClient);
+        initCamera(currentLocation);
+    }
 
+    /**
+     * Initialize the camera and some basic map properties
+     * @param currentLocation
+     */
+    private void initCamera(Location currentLocation) {
+        CameraPosition cameraPosition = CameraPosition.builder()
+                .target(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()))
+                .zoom(16f)
+                .bearing(0.0f)
+                .tilt(0.0f)
+                .build();
+
+        getMap().animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), null);
+
+        getMap().setMapType(MAP_TYPES[curMapTypeIndex]);
+        getMap().setTrafficEnabled(true);
+        getMap().setMyLocationEnabled(true);
+        getMap().getUiSettings().setZoomControlsEnabled(true);
     }
 
     @Override
