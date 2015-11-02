@@ -1,18 +1,25 @@
 package com.bozidar.labas.googlemaps.fragments;
 
+import android.graphics.BitmapFactory;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
 
+import com.bozidar.labas.googlemaps.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.io.IOException;
 
 /**
  * Created by Bozidar on 02.11.2015..
@@ -38,6 +45,7 @@ public class MapFragment extends SupportMapFragment implements GoogleApiClient.C
 
     /**
      * Creating GoogleApiClient and intializatin of LocationServices in order to get users current location
+     *
      * @param view
      * @param savedInstanceState
      */
@@ -65,7 +73,7 @@ public class MapFragment extends SupportMapFragment implements GoogleApiClient.C
     @Override
     public void onStop() {
         super.onStop();
-        if(googleApiClient != null && googleApiClient.isConnected()){
+        if (googleApiClient != null && googleApiClient.isConnected()) {
             googleApiClient.disconnect();
         }
     }
@@ -76,12 +84,13 @@ public class MapFragment extends SupportMapFragment implements GoogleApiClient.C
     private void initListeners() {
         getMap().setOnMarkerClickListener(this);
         getMap().setOnMapLongClickListener(this);
-        getMap().setOnInfoWindowClickListener( this );
+        getMap().setOnInfoWindowClickListener(this);
         getMap().setOnMapClickListener(this);
     }
 
     /**
      * Whwen the client has connected, grab the users most recently retrieved location and use that for aiming map camera
+     *
      * @param bundle
      */
     @Override
@@ -94,6 +103,7 @@ public class MapFragment extends SupportMapFragment implements GoogleApiClient.C
 
     /**
      * Initialize the camera and some basic map properties
+     *
      * @param currentLocation
      */
     private void initCamera(Location currentLocation) {
@@ -129,17 +139,48 @@ public class MapFragment extends SupportMapFragment implements GoogleApiClient.C
 
     @Override
     public void onMapClick(LatLng latLng) {
+        MarkerOptions options = new MarkerOptions().position(latLng);
+        options.title(getAddressFromLatLng(latLng));
+
+        options.icon(BitmapDescriptorFactory.defaultMarker());
+
+        getMap().addMarker(options);
 
     }
 
     @Override
     public void onMapLongClick(LatLng latLng) {
+        MarkerOptions options = new MarkerOptions().position(latLng);
+        options.title(getAddressFromLatLng(latLng));
 
+        options.icon(BitmapDescriptorFactory.fromBitmap(
+                BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher)));
+
+        getMap().addMarker(options);
+    }
+
+
+    /**
+     * Helper method that takes LatLng and runs it through Geocoder to get a street adress
+     * @param latLng
+     * @return
+     */
+    private String getAddressFromLatLng(LatLng latLng) {
+        Geocoder geocoder = new Geocoder(getActivity());
+        String adress = "";
+
+        try {
+            adress = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1).get(0).getAddressLine(0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return adress;
     }
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        return false;
+        marker.showInfoWindow();
+        return true;
     }
 }
 
